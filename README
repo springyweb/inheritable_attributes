@@ -1,0 +1,61 @@
+InheritableAttributes
+=====================
+
+Useful if model attributes are to be inherited from a parent object if blank.
+
+Example
+=======
+
+class Company < ActiveRecord::Base
+  # company has an attribute "address"
+  has_many :divisions
+end
+
+class Division < ActiveRecord::Base
+  # division has an attribute "address"
+  belongs_to :company
+  
+  inherit_attribute :address, :from => :company
+end
+
+class Department < ActiveRecord::Base
+  # department has an attribute "address"
+  belongs_to :division
+  
+  inherit_attribute :address, :from => :division
+end
+
+
+d = Department.first
+
+d.address  #=> returns d.address, unless that value is blank, in which case
+               it returns d.division.address, unless that value is blank,
+               in which case it returns d.division.company.address
+
+
+You can also specify more than one attribute to inherit:
+
+class Department
+  # department has an attribute "address"
+  belongs_to :division
+  
+  inherit_attributes [:address, :telephone], :from => :division
+end
+
+If the attribute has a different name in the parent, you can use the :as
+option to specify it:
+
+class Depot < ActiveRecord::Base
+  belongs_to :company
+  
+  inherit_attribute :postal_address, :from => :company, :as => :address
+end
+
+d = Depot.first
+d.postal_address #=> returns d.postal_address, unless that value is blank,
+                     in which case it returns d.company.address
+
+
+Copyright (c) 2008 Jon Evans, Springy Web (UK) Ltd. Released under the MIT license
+
+jon@springyweb.com
